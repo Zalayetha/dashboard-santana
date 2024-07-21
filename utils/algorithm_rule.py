@@ -718,12 +718,20 @@ def model_testing(predictions, actuals):
         total_FP.append(FP[i])
         print(f"TN= {TN[i]}\n")
         total_TN.append(TN[i])
-        print("Total TP=", sum(total_TP))
-        print("Total FN=", sum(total_FN))
-        print("Total FP=", sum(total_FP))
-        print("Total TN=", sum(total_TN))
-        # Print the evaluation metrics
-        print("Accuracy:", f"{accuracy:.0%}")
-        print("Precision:", f"{precision:.0%}")
-        print("Recall:", f"{recall:.0%}")
-        print("F1-Score:", f"{f1Score:.0%}")
+    print("Total TP=", sum(total_TP))
+    print("Total FN=", sum(total_FN))
+    print("Total FP=", sum(total_FP))
+    print("Total TN=", sum(total_TN))
+    # Print the evaluation metrics
+    print("Accuracy:", f"{accuracy:.0%}")
+    print("Precision:", f"{precision:.0%}")
+    print("Recall:", f"{recall:.0%}")
+    print("F1-Score:", f"{f1Score:.0%}")
+
+    result = {
+        "Accuracy": f"{accuracy:.0%}",
+        "Precision": f"{precision:.0%}",
+        "Recall": f"{recall:.0%}",
+        "F1-Score": f"{f1Score:.0%}"
+    }
+    return result

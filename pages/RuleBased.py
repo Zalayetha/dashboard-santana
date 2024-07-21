@@ -7,8 +7,12 @@ df = []
 
 
 def testClicked(predictions, actuals):
-    test = model_testing(predictions=predictions, actuals=actuals)
-    print("test")
+    result_test = model_testing(predictions=predictions, actuals=actuals)
+    st.subheader("Result")
+    st.markdown(f"Accuracy: {result_test['Accuracy']}")
+    st.markdown(f"Precision: {result_test['Precision']}")
+    st.markdown(f"Recall: {result_test['Recall']}")
+    st.markdown(f"F1-Score: {result_test['F1-Score']}")
 
 
 rule_based_ner = st.Page(
@@ -22,7 +26,7 @@ st.title("Rule Based NER")
 
 
 input_tab, tokenization_tab, feature_assignment_tab, rule_assignment_tab, name_tagging_tab, testing_tab = st.tabs(
-    ["Input Data", "Tokenization", "Feature Assignment", "Rule Assignment", "Manual Name Tagging", "Testing"])
+    ["Input Data", "Tokenization", "Feature Assignment", "Rule Assignment", "Manual Name Tagging", "Model Testing"])
 
 with input_tab:
     st.header("Input Data")

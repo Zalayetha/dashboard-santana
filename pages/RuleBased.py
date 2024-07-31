@@ -8,21 +8,21 @@ df = []
 
 def testClicked(predictions, actuals):
     result_test = model_testing(predictions=predictions, actuals=actuals)
-    st.subheader("Result")
-    st.markdown(f"Accuracy: {result_test['Accuracy']}")
-    st.markdown(f"Precision: {result_test['Precision']}")
-    st.markdown(f"Recall: {result_test['Recall']}")
-    st.markdown(f"F1-Score: {result_test['F1-Score']}")
+    st.header("Result")
+    st.subheader(f"Accuracy: {result_test['Accuracy']}")
+    st.subheader(f"Precision: {result_test['Precision']}")
+    st.subheader(f"Recall: {result_test['Recall']}")
+    st.subheader(f"F1-Score: {result_test['F1-Score']}")
 
 
 rule_based_ner = st.Page(
     'pages/RuleBased.py',
-    title="Rule Based NER",
+    title="Rule Based INER",
     icon=":material/home:"
 )
 
 # title
-st.title("Rule Based NER")
+st.title("Rule Based INER")
 
 
 input_tab, tokenization_tab, feature_assignment_tab, rule_assignment_tab, name_tagging_tab, testing_tab = st.tabs(
@@ -36,7 +36,7 @@ with input_tab:
         ['Ini text pertama', 'ini text kedua', 'ini text ketiga'])
 
     st.data_editor(df_format, use_container_width=True, hide_index=True)
-    uploaded_file = st.file_uploader("Upload an CSV File")
+    uploaded_file = st.file_uploader("Upload New CSV File", type="csv")
     if uploaded_file is not None:
         try:
 

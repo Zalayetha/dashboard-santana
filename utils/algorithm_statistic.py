@@ -12,9 +12,27 @@ import pprint
 import pycrfsuite
 nltk.download('punkt')
 
+# classify token
 
+
+def classify_token(token):
+    # Number Checker
+    if re.match("^\d+\.?\d*$", token):
+        return (token, "Number")
+
+    else:
+        return (token, "Word")
 # Normalized
-def normalized(word, normalized_word_dict):
+
+
+def normalized(word):
+    normalized_word = pd.read_excel("assets/data/normalisasi-V1.xlsx")
+    normalized_word_dict = {}
+
+    for index, row in normalized_word.iterrows():
+        if row[0] not in normalized_word_dict:
+            normalized_word_dict[row[0]] = row[1]
+
     return [normalized_word_dict[term] if term in normalized_word_dict else term for term in word]
 
 
@@ -92,22 +110,15 @@ def preprocessing(df):
     df[0] = df[0].apply(tokenizing)
 
     # Filtering and stemming
-
     # stemming
     df[0] = df[0].apply(stopwordsRemoval)
-    return df[0]
+    return df
 
 
 # Normalization Phase
 def normalization(df):
-    normalized_word = pd.read_excel("assets/data/normalisasi-V1.xlsx")
-    normalized_word_dict = {}
-
-    for index, row in normalized_word.iterrows():
-        if row[0] not in normalized_word_dict:
-            normalized_word_dict[row[0]] = row[1]
-
-    df = df.apply(normalized(normalized_word_dict))
+    df = df.apply(normalized)
+    return df
 
 
 # Pos Tagging Phase
@@ -121,3 +132,4 @@ def postTagging(df):
         for j in i:
             listNew.append(j)
     df = pd.DataFrame(listNew)
+    return df

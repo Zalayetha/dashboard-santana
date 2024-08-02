@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.algorithm_statistic import preprocessing
+from utils.algorithm_statistic import preprocessing, normalization, postTagging, classify_token
 
 # dataframe
 df = []
@@ -26,11 +26,9 @@ with input_tab:
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file, header=None)
-            st.data_editor(
+            st.dataframe(
                 df,
                 use_container_width=True,
-                num_rows='dynamic',
-                hide_index=True
             )
         except:
             st.error("Wrong type of file, file should be an CSV file.")
@@ -40,6 +38,86 @@ with preprocessing_tab:
     if len(df) == 0:
         st.warning("Please upload your file first in Input Data Tab.")
     else:
-        data = preprocessing(df)
+        df_preprocessing = preprocessing(df)
+        st.dataframe(
+            df_preprocessing[0],
+            use_container_width=True,
+
+        )
+with normalization_tab:
+    st.header("Normalization")
+    if len(df) == 0:
+        st.warning("Please upload your file first in Input Data Tab.")
+    else:
+        data_normalization = normalization(df=df_preprocessing[0])
+        st.data_editor(
+            data_normalization,
+            use_container_width=True,
+            num_rows='dynamic',
+            hide_index=True
+        )
+
+with post_tagging_tab:
+    st.header("Post Tagging")
+    if len(df) == 0:
+        st.warning("Please upload your fiel first in Input Data Tab.")
+    else:
+        data_post_tag = postTagging(df=data_normalization)
+        temp_bef1tag = []
+        currentTag = data_post_tag.values.tolist()
+
+        # extract currenttag to other array
+        for row in range(len(currentTag)):
+            data_row = currentTag[row][1]
+            temp_bef1tag.append(data_row)
+
+        bef1tag = []
+        for index in range(len(temp_bef1tag)):
+            if index == 0:
+                bef1tag.append(None)
+            else:
+                bef1tag.append(temp_bef1tag[index-1])
+
+        df_post_tag = {
+            "currentword": [data[0] for data in data_post_tag.values.tolist()],
+            "currenttag": [data[1] for data in data_post_tag.values.tolist()],
+            "bef1tag": [data for data in bef1tag],
+            "token": [classify_token(token=data[0])[1] for data in data_post_tag.values.tolist()]
+        }
+        st.dataframe(
+            pd.DataFrame(data=df_post_tag),
+            use_container_width=True,
+        )
+with bio_labeling_tab:
+    st.header("BIO Labeling")
+    st.warning(
+        "** Changes to columns other than the 'class' column will not affect the testing phase.")
+    if len(df) == 0:
+        st.warning("Please upload your fiel first in Input Data Tab.")
+    else:
+        label_options = {
+            "B-Bencana",
+            "I-Bencana",
+            "B-Lokasi",
+            "I-Lokasi",
+            "B-Dampak",
+            "I-Dampak",
+            "B-Waktu",
+            "I-Waktu"
+        }
+        df_bio_labeling = {
+            "currentword": [data[0] for data in data_post_tag.values.tolist()],
+            "currenttag": [data[1] for data in data_post_tag.values.tolist()],
+            "bef1tag": [data for data in bef1tag],
+            "token": [classify_token(token=data[0])[1] for data in data_post_tag.values.tolist()],
+            "class": ["None"] * len([data[0] for data in data_post_tag.values.tolist()])
+        }
+        edited_data_labeling = st.data_editor(
+            pd.DataFrame(data=df_bio_labeling),
+            use_container_width=True,
+            column_config={
+                "class": st.column_config.SelectboxColumn(label="class", options=label_options, required=True)
+            }
+        )
 st.warning(
     "Note: Please do not go to another page, because your work will be lost")

@@ -10,6 +10,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from nltk.tag import CRFTagger
 import pprint
 import pycrfsuite
+from sklearn.metrics import ConfusionMatrixDisplay, multilabel_confusion_matrix, f1_score
 nltk.download('punkt')
 
 # classify token
@@ -133,3 +134,107 @@ def postTagging(df):
             listNew.append(j)
     df = pd.DataFrame(listNew)
     return df
+
+
+# Naive Bayes Classifier
+def naive_bayes_classifier(df):
+    df_prediction = []
+    for i in df.values.tolist():
+        data = {
+            'currentword': i[0],
+            'currenttag': i[1],
+            'bef1tag': i[2],
+            'token': i[3],
+            'class': "?"
+        }
+        df_prediction.append(data)
+
+    # Step 1: Menghitung probabilitas kelas
+    total_data = len(df['class'])
+    kelas_counts = {}
+    for kelas in df['class']:
+        kelas_counts[kelas] = kelas_counts.get(kelas, 0)+1
+
+    probabilitas_kelas = {kelas: count /
+                          total_data for kelas, count in kelas_counts.items()}
+    total_data = sum(kelas_counts.values())
+
+    # Step 2 : Menghitung probabilitas setiap fitur dengan laplace smoothing
+    probabilitas_fitur = {}
+    unique_values_per_feature = {fitur: set()
+                                 for fitur in df if fitur != "class"}
+    for fitur in df:
+        if fitur != 'class':
+            for value in df[fitur]:
+                unique_values_per_feature[fitur].add(value)
+
+    for kelas in probabilitas_kelas:
+        probabilitas_fitur[kelas] = {}
+        for fitur in df:
+            if fitur != 'class':
+                fitur_counts = {}
+                for i in range(len(df['class'])):
+                    if (df["class"][i] == kelas):
+                        fitur_counts[df[fitur][i]] = fitur_counts.get(
+                            df[fitur][i], 0) + 1
+                        total_fitur_in_kelas = sum(fitur_counts.values())
+                        # Vocab Size buat laplace smoothing
+                        V = len(unique_values_per_feature[fitur])
+                        probabilitas_fitur[kelas][fitur] = {value: (count + 1) / (total_fitur_in_kelas + V)
+                                                            for value, count in fitur_counts.items()}
+
+    # Step 3: Menghitung probabilitas gabungan
+    predicted_class_list = []
+    for data in df_prediction:
+        probabilitas_gabungan = {}
+        for kelas in probabilitas_kelas:
+            probabilitas_gabungan[kelas] = probabilitas_kelas[kelas]
+            for fitur in data:
+                if fitur != "class":
+                    value = data[fitur]
+                    if value in probabilitas_fitur[kelas][fitur]:
+                        probabilitas_gabungan[kelas] *= probabilitas_fitur[kelas][fitur][value]
+                    else:
+                        # Laplace smoothing jika fitur dari data test tidak dikenal
+                        probabilitas_gabungan[kelas] *= 1 / (
+                            kelas_counts[kelas] + len(unique_values_per_feature[fitur]))
+        # Step 4: Menentukan kelas dengan probabilitas maksimum
+        predicted_class = max(probabilitas_gabungan,
+                              key=probabilitas_gabungan.get)
+        predicted_class_list.append(predicted_class)
+
+    # Return an new dataframe to display it on table
+    result_df = []
+    list_df = df.values.tolist()
+    try:
+        for i in range(len(list_df)):
+            data = {
+                'currentword': list_df[i][0],
+                'currenttag': list_df[i][1],
+                'bef1tag': list_df[i][2],
+                'token': list_df[i][3],
+                'class': predicted_class_list[i]
+            }
+            result_df.append(data)
+        print(result_df)
+        return pd.DataFrame(data=result_df)
+    except Exception:
+        print("Failed to return dataframe")
+
+
+# model testing
+def model_testing(predictions, actual):
+    accuracy = accuracy_score(actuals, predictions)
+    # or 'micro', 'weighted' based on your class distribution
+    precision = precision_score(actuals, predictions, average='macro')
+    recall = recall_score(actuals, predictions, average='macro')
+    f1Score = f1_score(actuals, predictions, average='macro')
+    conf_matrix = confusion_matrix(actuals, predictions)
+    # Print the evaluation metrics
+    result = {
+        "Accuracy": f"{accuracy:.1%}",
+        "Precision": f"{precision:.1%}",
+        "Recall": f"{recall:.1%}",
+        "F1-Score": f"{f1Score:.1%}"
+    }
+    return result

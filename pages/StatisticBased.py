@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.algorithm_statistic import preprocessing, normalization, postTagging, classify_token
+from utils.algorithm_statistic import preprocessing, normalization, postTagging, classify_token, naive_bayes_classifier, model_testing
 
 # dataframe
 df = []
@@ -12,8 +12,8 @@ statistic_based_ner = st.Page(
 # title
 st.title("Statistic Based NER")
 
-input_tab, preprocessing_tab, normalization_tab, post_tagging_tab, bio_labeling_tab, naive_bayes_classifier_tab = st.tabs(["Input Data", "Preprocessing", "Normalization",
-                                                                                                                           "POS Tagging", "BIO Labeling", "Naive Bayes Classifier"])
+input_tab, preprocessing_tab, normalization_tab, post_tagging_tab, bio_labeling_tab, naive_bayes_classifer_tab, model_testing_tab = st.tabs(["Input Data", "Preprocessing", "Normalization",
+                                                                                                                                            "POS Tagging", "BIO Labeling", "Naive Bayes Classifier", "Model Testing"])
 
 with input_tab:
     st.header("Input Data")
@@ -91,7 +91,7 @@ with post_tagging_tab:
 with bio_labeling_tab:
     st.header("BIO Labeling")
     st.warning(
-        "** Changes to columns other than the 'class' column will not affect the testing phase.")
+        "** Changes to columns other than the 'class' column will not affect the naive bayes classify phase.")
     if len(df) == 0:
         st.warning("Please upload your fiel first in Input Data Tab.")
     else:
@@ -103,7 +103,8 @@ with bio_labeling_tab:
             "B-Dampak",
             "I-Dampak",
             "B-Waktu",
-            "I-Waktu"
+            "I-Waktu",
+            "O"
         }
         df_bio_labeling = {
             "currentword": [data[0] for data in data_post_tag.values.tolist()],
@@ -119,5 +120,44 @@ with bio_labeling_tab:
                 "class": st.column_config.SelectboxColumn(label="class", options=label_options, required=True)
             }
         )
+
+with naive_bayes_classifer_tab:
+    st.header("Naive Bayes Classifier")
+    if len(df) == 0:
+        st.warning("Please upload your file first in Input Data Tab")
+    else:
+        if "None" in edited_data_labeling.loc[:, "class"].tolist():
+            st.warning(
+                "You cannot run the model before complete the BIO Labeling.")
+        else:
+            df_classifier = naive_bayes_classifier(edited_data_labeling)
+            st.dataframe(
+                data=df_classifier,
+                use_container_width=True
+            )
+
+
+with model_testing_tab:
+    st.header("Model Testing")
+    if len(df) == 0:
+        st.warning("Please upload your file first in Input Data Tab.")
+    else:
+        st.subheader("Actuals Data")
+        edited_data_labeling
+
+        st.subheader("Predictions Data")
+        predictions_table = st.dataframe(
+            data=df_classifier,
+            use_container_width=True
+        )
+
+        result_test = model_testing(
+            predictions=df_classifier, actual=df_bio_labeling)
+        st.subheader(f"Accuracy: {result_test['Accuracy']}")
+        st.subheader(f"Precision: {result_test['Precision']}")
+        st.subheader(f"Recall: {result_test['Recall']}")
+        st.subheader(f"F1-Score: {result_test['F1-Score']}")
+
+
 st.warning(
     "Note: Please do not go to another page, because your work will be lost")

@@ -10,7 +10,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from nltk.tag import CRFTagger
 import pprint
 import pycrfsuite
-from sklearn.metrics import ConfusionMatrixDisplay, multilabel_confusion_matrix, f1_score
+from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
 nltk.download('punkt')
 
 # classify token
@@ -224,12 +224,14 @@ def naive_bayes_classifier(df):
 
 # model testing
 def model_testing(predictions, actual):
-    accuracy = accuracy_score(actuals, predictions)
+    print(f"predictions {predictions}")
+    print(f"actual {actual}")
+    accuracy = accuracy_score(actual, predictions)
     # or 'micro', 'weighted' based on your class distribution
-    precision = precision_score(actuals, predictions, average='macro')
-    recall = recall_score(actuals, predictions, average='macro')
-    f1Score = f1_score(actuals, predictions, average='macro')
-    conf_matrix = confusion_matrix(actuals, predictions)
+    precision = precision_score(actual, predictions, average='macro')
+    recall = recall_score(actual, predictions, average='macro')
+    f1Score = f1_score(actual, predictions, average='macro')
+    conf_matrix = confusion_matrix(actual, predictions)
     # Print the evaluation metrics
     result = {
         "Accuracy": f"{accuracy:.1%}",

@@ -142,21 +142,29 @@ with model_testing_tab:
     if len(df) == 0:
         st.warning("Please upload your file first in Input Data Tab.")
     else:
-        st.subheader("Actuals Data")
-        edited_data_labeling
+        if "None" in edited_data_labeling.loc[:, "class"].tolist():
+            st.warning(
+                "You cannot testing the model before complete the BIO Labeling.")
 
-        st.subheader("Predictions Data")
-        predictions_table = st.dataframe(
-            data=df_classifier,
-            use_container_width=True
-        )
+        else:
+            st.subheader("Actuals Data")
+            actual_table = st.dataframe(
+                data=edited_data_labeling,
+                use_container_width=True
+            )
 
-        result_test = model_testing(
-            predictions=df_classifier, actual=df_bio_labeling)
-        st.subheader(f"Accuracy: {result_test['Accuracy']}")
-        st.subheader(f"Precision: {result_test['Precision']}")
-        st.subheader(f"Recall: {result_test['Recall']}")
-        st.subheader(f"F1-Score: {result_test['F1-Score']}")
+            st.subheader("Predictions Data")
+            predictions_table = st.dataframe(
+                data=df_classifier,
+                use_container_width=True
+            )
+
+            result_test = model_testing(
+                predictions=df_classifier.loc[:, "class"].tolist(), actual=edited_data_labeling.loc[:, "class"].tolist())
+            st.subheader(f"Accuracy: {result_test['Accuracy']}")
+            st.subheader(f"Precision: {result_test['Precision']}")
+            st.subheader(f"Recall: {result_test['Recall']}")
+            st.subheader(f"F1-Score: {result_test['F1-Score']}")
 
 
 st.warning(

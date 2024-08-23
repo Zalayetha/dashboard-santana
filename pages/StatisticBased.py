@@ -12,8 +12,8 @@ statistic_based_ner = st.Page(
 # title
 st.title("Statistic Based NER")
 
-input_tab, preprocessing_tab, normalization_tab, post_tagging_tab, bio_labeling_tab, naive_bayes_classifer_tab, evaluation_tab = st.tabs(["Input Data", "Preprocessing", "Normalization",
-                                                                                                                                          "POS Tagging", "BIO Labeling", "Naive Bayes Classifier", "Model Evaluation"])
+input_tab, preprocessing_tab, normalization_tab, post_tagging_tab, bio_labeling_tab, naive_bayes_classifer_tab, testing_tab = st.tabs(["Input Data", "Preprocessing", "Normalization",
+                                                                                                                                       "POS Tagging", "BIO Labeling", "Naive Bayes Classifier", "Model Testing"])
 
 with input_tab:
     st.header("Input Data")
@@ -137,8 +137,8 @@ with naive_bayes_classifer_tab:
             )
 
 
-with evaluation_tab:
-    st.header("Model Evaluation")
+with testing_tab:
+    st.header("Model Testing")
     if len(df) == 0:
         st.warning("Please upload your file first in Input Data Tab.")
     else:

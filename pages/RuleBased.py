@@ -25,8 +25,8 @@ rule_based_ner = st.Page(
 st.title("Rule Based INER")
 
 
-input_tab, tokenization_tab, feature_assignment_tab, rule_assignment_tab, name_tagging_tab, evaluation_tab = st.tabs(
-    ["Input Data", "Tokenization", "Feature Assignment", "Rule Assignment", "Manual Name Tagging", "Model Evaluation"])
+input_tab, tokenization_tab, feature_assignment_tab, rule_assignment_tab, name_tagging_tab, testing_tab = st.tabs(
+    ["Input Data", "Tokenization", "Feature Assignment", "Rule Assignment", "Manual Name Tagging", "Model Testing"])
 
 with input_tab:
     st.header("Input Data")
@@ -141,8 +141,8 @@ with name_tagging_tab:
         )
 
 
-with evaluation_tab:
-    st.header("Model Evaluation")
+with testing_tab:
+    st.header("Model Testing")
     if len(df) == 0:
         st.warning("Please upload your file first in Input Data Tab.")
     else:

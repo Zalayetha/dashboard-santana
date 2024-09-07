@@ -1,6 +1,15 @@
 import streamlit as st
 import pandas as pd
 from utils.algorithm_statistic import preprocessing, normalization, postTagging, classify_token, naive_bayes_classifier, model_testing
+from utils.generate_url import generateUrl
+from api_service.apiService import fetch_data
+# Save Bio Labeling Function
+
+
+def save_bio_labeling(df):
+    print("Save BIO Labeling Data....")
+    print(df)
+
 
 # dataframe
 df = []
@@ -95,17 +104,10 @@ with bio_labeling_tab:
     if len(df) == 0:
         st.warning("Please upload your fiel first in Input Data Tab.")
     else:
-        label_options = {
-            "B-Bencana",
-            "I-Bencana",
-            "B-Lokasi",
-            "I-Lokasi",
-            "B-Dampak",
-            "I-Dampak",
-            "B-Waktu",
-            "I-Waktu",
-            "O"
-        }
+        url_class_statistic = generateUrl("CLASS_STATISTIC")
+        class_statistic = fetch_data(url=url_class_statistic)["responseBody"]
+        label_options = set(class_statistic)
+        print(label_options)
         df_bio_labeling = {
             "currentword": [data[0] for data in data_post_tag.values.tolist()],
             "currenttag": [data[1] for data in data_post_tag.values.tolist()],
@@ -120,6 +122,7 @@ with bio_labeling_tab:
                 "class": st.column_config.SelectboxColumn(label="class", options=label_options, required=True)
             }
         )
+        st.button("Save", on_click=save_bio_labeling(df=edited_data_labeling))
 
 with naive_bayes_classifer_tab:
     st.header("Naive Bayes Classifier")

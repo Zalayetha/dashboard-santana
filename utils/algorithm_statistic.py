@@ -11,6 +11,8 @@ from nltk.tag import CRFTagger
 import pprint
 import pycrfsuite
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
+from api_service.apiService import *
+from utils.generate_url import *
 nltk.download('punkt')
 
 # classify token
@@ -27,13 +29,11 @@ def classify_token(token):
 
 
 def normalized(word):
-    normalized_word = pd.read_excel("assets/data/normalisasi-V1.xlsx")
-    normalized_word_dict = {}
 
-    for index, row in normalized_word.iterrows():
-        if row[0] not in normalized_word_dict:
-            normalized_word_dict[row[0]] = row[1]
-
+    # hit api to get normalization dictionary
+    url_normalization = generateUrl("NORMALIZATION")
+    normalized_word_dict = fetch_data(url=url_normalization)["responseBody"]
+    print(normalized_word_dict)
     return [normalized_word_dict[term] if term in normalized_word_dict else term for term in word]
 
 
@@ -45,19 +45,10 @@ def stopwordsRemoval(words):
         nltk.download("stopwords")
         indo_stopwords = stopwords.words('indonesian')
 
-    indo_stopwords.extend([
-        "yg", "dg", "rt", "dgn", "ny", "d", 'klo',
-        'kalo', 'amp', 'biar', 'bikin', 'bilang',
-        'gak', 'ga', 'krn', 'nya', 'nih', 'sih',
-        'si', 'tau', 'tdk', 'tuh', 'utk', 'ya',
-        'jd', 'jgn', 'sdh', 'aja', 'n', 't',
-        'nyg', 'hehe', 'pen', 'u', 'nan', 'loh', 'rt',
-        '&amp', 'yah', 'dk', 'dgn', 'ds'
-    ])
-
-    txt_stopword = pd.read_csv(
-        "assets/data/stopwords_id_satya.txt", names=["stopwords"], header=None)
-    indo_stopwords.extend(txt_stopword["stopwords"][0].split(" "))
+    # call the stopword api
+    url_stopwords = generateUrl("STOPWORDS")
+    extended_stopwords = fetch_data(url=url_stopwords)
+    indo_stopwords.extend(extended_stopwords["responseBody"])
 
     factory = StemmerFactory()
 

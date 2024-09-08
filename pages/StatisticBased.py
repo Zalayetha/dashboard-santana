@@ -13,7 +13,8 @@ def save_bio_labeling(data):
 
     save_bio_labeling_url = generateUrl("SAVE_BIO_LABELING_STATISTIC")
 
-    insert_preprocessing_data(url=save_bio_labeling_url, data=temp_df)
+    result = insert_preprocessing_data(url=save_bio_labeling_url, data=temp_df)
+    return result
 
 
 # dataframe
@@ -130,9 +131,7 @@ with bio_labeling_tab:
                 "class": st.column_config.SelectboxColumn(label="class", options=label_options, required=True)
             }
         )
-        if st.button("Save"):
 
-            save_bio_labeling(data=edited_data_labeling)
 
 with naive_bayes_classifer_tab:
     st.header("Naive Bayes Classifier")
@@ -181,6 +180,13 @@ with testing_tab:
             st.subheader(f"Precision: {result_test['Precision']}")
             st.subheader(f"Recall: {result_test['Recall']}")
             st.subheader(f"F1-Score: {result_test['F1-Score']}")
+
+            if st.button("Save Model"):
+                result = save_bio_labeling(data=edited_data_labeling)
+                if result['responseStatus'] == True:
+                    st.write(result['responseMessage'])
+                else:
+                    st.write("Failed to save model.")
 
 
 st.warning(

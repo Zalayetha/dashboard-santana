@@ -33,7 +33,6 @@ def normalized(word):
     # hit api to get normalization dictionary
     url_normalization = generateUrl("NORMALIZATION")
     normalized_word_dict = fetch_data(url=url_normalization)["responseBody"]
-    print(normalized_word_dict)
     return [normalized_word_dict[term] if term in normalized_word_dict else term for term in word]
 
 
@@ -207,7 +206,6 @@ def naive_bayes_classifier(df):
                 'class': predicted_class_list[i]
             }
             result_df.append(data)
-        print(result_df)
         return pd.DataFrame(data=result_df)
     except Exception:
         print("Failed to return dataframe")

@@ -2,13 +2,18 @@ import streamlit as st
 import pandas as pd
 from utils.algorithm_statistic import preprocessing, normalization, postTagging, classify_token, naive_bayes_classifier, model_testing
 from utils.generate_url import generateUrl
-from api_service.apiService import fetch_data
+from api_service.apiService import fetch_data, insert_preprocessing_data
+
+
 # Save Bio Labeling Function
-
-
-def save_bio_labeling(df):
+def save_bio_labeling(data):
     print("Save BIO Labeling Data....")
-    print(df)
+    temp_df = data
+    # Translate Class Statistic To Numeric Based On id in database
+
+    save_bio_labeling_url = generateUrl("SAVE_BIO_LABELING_STATISTIC")
+
+    insert_preprocessing_data(url=save_bio_labeling_url, data=temp_df)
 
 
 # dataframe
@@ -106,8 +111,11 @@ with bio_labeling_tab:
     else:
         url_class_statistic = generateUrl("CLASS_STATISTIC")
         class_statistic = fetch_data(url=url_class_statistic)["responseBody"]
-        label_options = set(class_statistic)
-        print(label_options)
+
+        label_options = []
+        for data in class_statistic:
+            label_options.append(data['class'])
+        label_options = set(label_options)
         df_bio_labeling = {
             "currentword": [data[0] for data in data_post_tag.values.tolist()],
             "currenttag": [data[1] for data in data_post_tag.values.tolist()],
@@ -122,14 +130,19 @@ with bio_labeling_tab:
                 "class": st.column_config.SelectboxColumn(label="class", options=label_options, required=True)
             }
         )
-        st.button("Save", on_click=save_bio_labeling(df=edited_data_labeling))
+        if st.button("Save"):
+
+            save_bio_labeling(data=edited_data_labeling)
 
 with naive_bayes_classifer_tab:
     st.header("Naive Bayes Classifier")
     if len(df) == 0:
         st.warning("Please upload your file first in Input Data Tab")
     else:
+        print("Naive Bayes Classifier....")
+        print(edited_data_labeling)
         if "None" in edited_data_labeling.loc[:, "class"].tolist():
+            print("There is None in your BIO Labeling")
             st.warning(
                 "You cannot run the model before complete the BIO Labeling.")
         else:
